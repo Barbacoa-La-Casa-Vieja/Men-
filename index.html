@@ -8,7 +8,18 @@
     <script>
         (function(){
             try {
-                var t = localStorage.getItem('theme') || 'light';
+                var STORE_ID = 'bcv_casa_vieja_claveria_6x_';
+                window.STORE_ID = STORE_ID;
+                var themeKey = STORE_ID + 'theme';
+                var t = localStorage.getItem(themeKey);
+                // Migración única: si existe la clave vieja 'theme' y no la nueva, la copiamos
+                if (t === null) {
+                    var oldTheme = localStorage.getItem('theme');
+                    if (oldTheme !== null) {
+                        t = oldTheme;
+                        localStorage.setItem(themeKey, oldTheme);
+                    }
+                }
                 if (t !== 'dark') t = 'light';
                 document.documentElement.setAttribute('data-theme', t);
             } catch(e) {
@@ -261,6 +272,11 @@
         .customizable-badge { position: absolute; top: 10px; right: 10px; background: var(--color-foundry-black); color: var(--color-bone-white); border: 1px solid var(--color-chalk-white); font-family: var(--font-mono); font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 4px 7px; border-radius: var(--radius-sm); display: flex; align-items: center; gap: 4px; }
         .availability-badge { position: absolute; top: 10px; left: 10px; background: var(--color-foundry-black); color: var(--color-ember-orange); border: 1px solid var(--color-ember-orange); font-family: var(--font-mono); font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 4px 7px; border-radius: var(--radius-sm); display: flex; align-items: center; gap: 4px; animation: pulseSoft 2s ease-in-out infinite; }
         @keyframes pulseSoft { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+        /* ESTILOS PARA PRODUCTOS AGOTADOS */
+        .product-card.out-of-stock { opacity: 0.6; filter: grayscale(1); cursor: not-allowed; }
+        .product-card.out-of-stock .add-to-cart, .product-card.out-of-stock .quantity-btn { pointer-events: none; opacity: 0.5; }
+        .sold-out-badge { position: absolute; top: 10px; left: 10px; background: #333; color: #fff; border: 1px solid #555; font-family: var(--font-mono); font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 4px 7px; border-radius: var(--radius-sm); display: flex; align-items: center; gap: 4px; z-index: 2; }
 
         .product-quantity-controls { display: flex; align-items: center; gap: 6px; flex: 1; justify-content: flex-end; }
         .quantity-btn { width: 30px; height: 30px; border-radius: var(--radius-sm); background-color: transparent; border: 1px solid var(--color-soot); color: var(--color-bone-white); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.65rem; }
@@ -562,6 +578,76 @@
             .payment-methods { flex-direction: column; }
             .social-grid { grid-template-columns: 1fr 1fr; }
         }
+
+        /* ===== FIX ZOOM iOS ===== */
+        input[type="text"],input[type="search"],input[type="tel"],input[type="number"],input[type="email"],input[type="url"],input[type="password"],textarea,select{font-size:16px !important}
+        @media (min-width:769px){input[type="text"],input[type="search"],input[type="tel"],input[type="number"],input[type="email"],input[type="url"],input[type="password"],textarea,select{font-size:13px !important}}
+
+        /* ===== AVISO DE PRIVACIDAD ===== */
+        .privacy-link {
+            display: inline-block;
+            margin-top: 16px;
+            background: transparent;
+            border: none;
+            font-family: var(--font-mono);
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--color-ash);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            cursor: pointer;
+            padding: 6px 10px;
+            transition: color 0.2s ease;
+        }
+        .privacy-link:hover { color: var(--color-ember-orange); }
+
+        .privacy-modal-content { max-width: 640px; }
+        .privacy-modal-content .product-modal-info { padding: 28px 24px; }
+        .privacy-modal-title {
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--color-ember-orange);
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--color-soot);
+        }
+        .privacy-modal-title i { margin-right: 8px; }
+        .privacy-modal-body {
+            font-family: var(--font-sans);
+            font-size: 0.78rem;
+            line-height: 1.65;
+            color: var(--color-ash);
+        }
+        .privacy-modal-body h4 {
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--color-bone-white);
+            margin-top: 20px;
+            margin-bottom: 8px;
+        }
+        .privacy-modal-body h4:first-child { margin-top: 0; }
+        .privacy-modal-body p { margin-bottom: 10px; }
+        .privacy-modal-body ul { margin: 0 0 12px 18px; padding: 0; }
+        .privacy-modal-body li { margin-bottom: 4px; }
+        .privacy-modal-body strong { color: var(--color-bone-white); }
+        .privacy-modal-body a { color: var(--color-ember-orange); text-decoration: underline; word-break: break-word; }
+        .privacy-updated {
+            margin-top: 20px;
+            padding-top: 12px;
+            border-top: 1px dashed var(--color-soot);
+            font-family: var(--font-mono);
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--color-ash);
+        }
     </style>
 </head>
 <body>
@@ -646,10 +732,11 @@
 
                 <footer>
                     <img src="https://i.ibb.co/jkWp21kD/IMG-4398.jpg" alt="Logo Footer" class="footer-logo">
-                    <p>&copy; 2025 Barbacoa de la Casa Vieja</p>
+                    <p>&copy; 2026 Barbacoa de la Casa Vieja</p>
                     <p style="margin-top: 10px;">
                         <i class="fab fa-whatsapp" style="color: var(--color-ember-orange);"></i> WhatsApp: +52 55 7867 7774
                     </p>
+                    <button type="button" class="privacy-link">Aviso de Privacidad</button>
                 </footer>
             </div>
         </section>
@@ -1009,10 +1096,11 @@
 
                     <footer style="margin-top: 30px;">
                         <img src="https://i.ibb.co/jkWp21kD/IMG-4398.jpg" alt="Logo Footer" class="footer-logo">
-                        <p>&copy; 2025 Barbacoa de la Casa Vieja</p>
+                        <p>&copy; 2026 Barbacoa de la Casa Vieja</p>
                         <p style="margin-top: 10px;">
                             <i class="fab fa-whatsapp" style="color: var(--color-ember-orange);"></i> +52 55 7867 7774
                         </p>
+                        <button type="button" class="privacy-link">Aviso de Privacidad</button>
                     </footer>
 
                     <!-- SECCIÓN CRONOS6XLAB - NO INVASIVA -->
@@ -1020,7 +1108,6 @@
                         <p style="font-family: var(--font-mono); font-size: 0.65rem; color: var(--color-ash); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">
                             <i class="fas fa-laptop-code" style="color: var(--color-ember-orange); margin-right: 6px;"></i> Menú digital creado por <strong style="color: var(--color-bone-white);">CRONOS6XLAB</strong>
                         </p>
-                        <!-- CONFIGURA AQUÍ TU ENLACE PERSONALIZADO DE CONTACTO -->
                         <a href="https://cronos6xla-bio.vercel.app/" target="_blank" rel="noopener" class="ghost-btn" style="display: inline-flex; width: auto; padding: 8px 16px; margin-top: 0;">
                             <i class="fas fa-rocket"></i> Quiero uno para mi negocio
                         </a>
@@ -1043,9 +1130,10 @@
             <span>Carrito</span>
             <span class="bottom-nav-badge hidden" id="bottomNavBadge">0</span>
         </button>
-        <button class="bottom-nav-item" data-screen="history" type="button">
+        <button class="bottom-nav-item" data-screen="history" type="button" aria-label="Historial de pedidos">
             <i class="fas fa-history"></i>
             <span>Historial</span>
+            <span class="bottom-nav-badge hidden" id="bottomNavHistoryBadge">0</span>
         </button>
         <button class="bottom-nav-item" data-screen="info" type="button">
             <i class="fas fa-info-circle"></i>
@@ -1054,7 +1142,7 @@
     </nav>
 
     <!-- PRODUCT MODAL -->
-    <div class="product-modal" id="productModal">
+    <div class="product-modal" id="productModal" role="dialog" aria-modal="true" aria-labelledby="modalProductTitle">
         <div class="product-modal-content">
             <button class="product-modal-close" id="closeProductModal" type="button">
                 <i class="fas fa-times"></i>
@@ -1100,6 +1188,107 @@
         </div>
     </div>
 
+    <!-- AVISO DE PRIVACIDAD -->
+    <div class="product-modal privacy-modal" id="privacyModal" role="dialog" aria-modal="true" aria-labelledby="privacyModalTitle">
+        <div class="product-modal-content privacy-modal-content">
+            <button class="product-modal-close" id="closePrivacyModal" type="button" aria-label="Cerrar">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="product-modal-info">
+                <h3 id="privacyModalTitle" class="privacy-modal-title">
+                    <i class="fas fa-shield-alt"></i> Aviso de Privacidad Integral
+                </h3>
+                <div class="privacy-modal-body">
+                    <p>
+                        <strong>Barbacoa de la Casa Vieja</strong>, con domicilio en Claveria, Azcapotzalco,
+                        Ciudad de México, es el <strong>responsable del tratamiento</strong> de los datos
+                        personales que nos proporcione. Éstos serán protegidos conforme a lo dispuesto por la
+                        <strong>Ley Federal de Protección de Datos Personales en Posesión de los Particulares
+                        (LFPDPPP)</strong>, su Reglamento y demás normatividad aplicable en los Estados Unidos
+                        Mexicanos.
+                    </p>
+
+                    <h4>1. Datos personales que recabamos</h4>
+                    <ul>
+                        <li>Nombre completo</li>
+                        <li>Número de teléfono</li>
+                        <li>Dirección de entrega (en caso de envío a domicilio)</li>
+                        <li>Detalles de ubicación (referencias, color de fachada, número interior, etc.)</li>
+                        <li>Coordenadas geográficas (únicamente si usted autoriza el uso de su ubicación)</li>
+                        <li>Preferencias, notas y contenido del pedido</li>
+                    </ul>
+                    <p>No recabamos datos personales sensibles.</p>
+
+                    <h4>2. Finalidades del tratamiento</h4>
+                    <p><strong>Finalidades primarias</strong> (necesarias para la relación con usted):</p>
+                    <ul>
+                        <li>Procesar, preparar y entregar su pedido</li>
+                        <li>Contactarle para confirmar, aclarar o dar seguimiento a su pedido</li>
+                        <li>Calcular el costo de envío y gestionar la entrega a domicilio</li>
+                        <li>Atender aclaraciones, quejas o solicitudes relacionadas con su pedido</li>
+                    </ul>
+                    <p><strong>Finalidades secundarias</strong> (puede oponerse a ellas):</p>
+                    <ul>
+                        <li>Envío de promociones, avisos de disponibilidad y novedades del negocio</li>
+                        <li>Invitaciones a eventos y encuestas de satisfacción</li>
+                    </ul>
+
+                    <h4>3. Transferencias de datos</h4>
+                    <p>
+                        Sus datos personales <strong>no serán transferidos a terceros</strong> sin su
+                        consentimiento, salvo las excepciones previstas en el artículo 37 de la LFPDPPP.
+                        Podrán ser compartidos con el servicio de mensajería (WhatsApp / Meta) únicamente
+                        para la gestión de su pedido.
+                    </p>
+
+                    <h4>4. Almacenamiento local en su navegador</h4>
+                    <p>
+                        Este menú digital guarda información de su carrito, historial de pedidos, tema de
+                        preferencia y datos de contacto en el <strong>almacenamiento local (localStorage)</strong>
+                        de su navegador, <strong>exclusivamente en su dispositivo</strong>. Esta información no
+                        se transmite a nuestros servidores salvo cuando usted decide enviar un pedido vía WhatsApp.
+                    </p>
+
+                    <h4>5. Derechos ARCO</h4>
+                    <p>
+                        Usted tiene derecho a <strong>Acceder, Rectificar, Cancelar u Oponerse</strong> al
+                        tratamiento de sus datos personales (Derechos ARCO), así como a
+                        <strong>revocar su consentimiento</strong>. Para ejercerlos, envíe su solicitud a:
+                    </p>
+                    <ul>
+                        <li><strong>Correo:</strong> <a href="mailto:contacto@casavieja.mx">contacto@casavieja.mx</a></li>
+                        <li><strong>WhatsApp:</strong> <a href="https://wa.me/525578677774" target="_blank" rel="noopener">+52 55 7867 7774</a></li>
+                    </ul>
+                    <p>
+                        Su solicitud deberá incluir: nombre completo, medio de contacto, copia de
+                        identificación oficial y descripción clara del derecho que desea ejercer.
+                        Le responderemos en un plazo máximo de <strong>20 días hábiles</strong>.
+                    </p>
+
+                    <h4>6. Limitación del uso o divulgación</h4>
+                    <p>
+                        Puede solicitar la limitación del uso o divulgación de sus datos personales
+                        enviando un correo a la dirección señalada en el punto anterior.
+                    </p>
+
+                    <h4>7. Cambios al presente aviso</h4>
+                    <p>
+                        Nos reservamos el derecho de modificar este Aviso de Privacidad en cualquier
+                        momento. Las modificaciones serán publicadas en este mismo menú digital.
+                    </p>
+
+                    <h4>8. Consentimiento</h4>
+                    <p>
+                        Al proporcionar sus datos personales y enviar un pedido, usted
+                        <strong>acepta los términos de este Aviso de Privacidad</strong>.
+                    </p>
+
+                    <p class="privacy-updated"><i class="fas fa-sync-alt"></i> Última actualización: 2026</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="notification" id="notification">Mensaje aquí</div>
 
     <script>
@@ -1110,7 +1299,9 @@
         const restaurantCoords = { lat: 19.4646, lng: -99.1853 };
         const TIMEZONE = 'America/Mexico_City';
 
-        const MAKE_WEBHOOK_URL = "https://hook.us2.make.com/dflhy5kveofxbpe2ebsysc2g3c938s2e";
+        // ✅ URLs del proxy (las reales viven en el Worker de Cloudflare)
+        const MENU_API_URL = "https://barbacoa-proxy.cronos6xlab.workers.dev/menu";
+        const MAKE_WEBHOOK_URL = "https://barbacoa-proxy.cronos6xlab.workers.dev/order";
 
         const SCHEDULE_LEAD_MINUTES   = 45;
         const SCHEDULE_SLOT_START     = 8 * 60 + 45;
@@ -1119,12 +1310,39 @@
         const MAX_SCHEDULE_DATES      = 8;
         const SCHEDULE_SCAN_DAYS      = 28;
 
-        const HISTORY_KEY = 'orderHistory';
-        const HISTORY_MAX = 40;
+        // ============================================
+        // AISLAMIENTO POR TIENDA (STORE_ID)
+        // Todas las claves de localStorage llevan el
+        // prefijo STORE_ID para evitar colisiones con
+        // otros menús hospedados en el mismo dominio.
+        // ============================================
+        const STORE_ID = window.STORE_ID || 'bcv_casa_vieja_claveria_6x_';
 
-        // Claves para guardar datos del cliente silenciosamente
-        const CLIENT_DATA_KEY = 'clientProfileData';
-        const DELIVERY_DATA_KEY = 'lastDeliveryProfile';
+        const CART_KEY          = STORE_ID + 'cart';
+        const THEME_KEY         = STORE_ID + 'theme';
+        const HISTORY_KEY       = STORE_ID + 'orderHistory';
+        const HISTORY_MAX       = 40;
+        const CLIENT_DATA_KEY   = STORE_ID + 'clientProfileData';
+        const DELIVERY_DATA_KEY = STORE_ID + 'lastDeliveryProfile';
+
+        // Migración única de claves antiguas (sin prefijo) → nuevas claves por tienda.
+        // No eliminamos las claves viejas para no afectar a otros menús del dominio.
+        (function migrateOldLocalStorageKeys() {
+            try {
+                const pairs = [
+                    ['cart',                 CART_KEY],
+                    ['orderHistory',         HISTORY_KEY],
+                    ['clientProfileData',    CLIENT_DATA_KEY],
+                    ['lastDeliveryProfile',  DELIVERY_DATA_KEY]
+                ];
+                pairs.forEach(function(pair) {
+                    const oldVal = localStorage.getItem(pair[0]);
+                    if (oldVal !== null && localStorage.getItem(pair[1]) === null) {
+                        localStorage.setItem(pair[1], oldVal);
+                    }
+                });
+            } catch(e) {}
+        })();
 
         const shippingRates = {
             baseRate: 10.00,
@@ -1142,7 +1360,7 @@
         };
 
         // ============================================
-        // PRODUCTOS
+        // MODIFICADORES (catálogos fijos en el código)
         // ============================================
         const CORTES_BARBACOA = [
             { id: 100, name: "Maciza o pierna", description: "Selección de corte", price: 0.00 },
@@ -1161,34 +1379,97 @@
             { id: 112, name: "Tamarindo", description: "Agridulce", price: 0.00 },
             { id: 113, name: "Jamaica", description: "Floral", price: 0.00 }
         ];
-
-        const products = [
-            { id: 1, name: "Kilogramo de barbacoa", category: "barbacoa", description: "Deliciosa barbacoa de borrego cocida a fuego lento por horas. Incluye tortillas, cebolla, cilantro, salsa y limón.", price: 880.00, image: "https://i.ibb.co/8nq6VhpF/IMG-4420.jpg", modifiers: { selection: CORTES_BARBACOA, extras: EXTRAS_BARBACOA } },
-            { id: 2, name: "1/2 Kilogramo de barbacoa", category: "barbacoa", description: "Media porción de nuestra deliciosa barbacoa de borrego. Incluye tortillas, cebolla, cilantro, salsa y limón.", price: 440.00, image: "https://i.ibb.co/fYGGQmbQ/IMG-4423.jpg", modifiers: { selection: CORTES_BARBACOA, extras: EXTRAS_BARBACOA } },
-            { id: 3, name: "1/4 Kilogramo de barbacoa", category: "barbacoa", description: "Cuarto de kilogramo de barbacoa de borrego. Incluye tortillas, cebolla, cilantro, salsa y limón.", price: 220.00, image: "https://i.ibb.co/21HD2W3h/IMG-4428.png", modifiers: { selection: CORTES_BARBACOA, extras: EXTRAS_BARBACOA } },
-            { id: 4, name: "Kilogramo de pancita", category: "pancita", description: "Menudo de pancita de res, cocido a la perfección con nuestro sazón especial.", price: 880.00, image: "https://i.ibb.co/v4fr6mGB/Photoroom-20260103-133225.jpg", modifiers: { selection: [], extras: EXTRAS_BARBACOA } },
-            { id: 5, name: "1/2 Kilogramo de pancita", category: "pancita", description: "Media porción de nuestra deliciosa pancita de res.", price: 440.00, image: "https://i.ibb.co/4gMSF82Y/Photoroom-20260103-132344.jpg", modifiers: { selection: [], extras: EXTRAS_BARBACOA } },
-            { id: 6, name: "1/4 Kilogramo de pancita", category: "pancita", description: "Cuarto de kilogramo de pancita de res.", price: 220.00, image: "https://i.ibb.co/4gMSF82Y/Photoroom-20260103-132344.jpg", modifiers: { selection: [], extras: EXTRAS_BARBACOA } },
-            { id: 7, name: "Litro de consomé", category: "consome", description: "Un litro de nuestro delicioso consomé de borrego.", price: 190.00, image: "https://i.ibb.co/sdFbnRs0/IMG-4490.jpg", modifiers: { selection: [], extras: [{ id: 107, name: "Sin garbanzo", description: "Preparado sin garbanzo", price: 0.00 }] } },
-            { id: 8, name: "1/2 Litro de consomé", category: "consome", description: "Medio litro de consomé de borrego.", price: 95.00, image: "https://i.ibb.co/sdTLHhTW/IMG-4491.jpg", modifiers: { selection: [], extras: [{ id: 107, name: "Sin garbanzo", description: "Preparado sin garbanzo", price: 0.00 }] } },
-            { id: 9, name: "Flautas doradas de barbacoa, orden de tres", category: "flautas", description: "Tres flautas doradas rellenas de barbacoa, bañadas en crema, queso y lechuga.", price: 160.00, image: "https://i.ibb.co/PknjzJZ/Photoroom-20260124-142420.jpg", modifiers: { selection: [], extras: [{ id: 108, name: "Extra crema", description: "Crema adicional", price: 5.00 }, { id: 109, name: "Extra queso", description: "Queso rallado adicional", price: 5.00 }] } },
-            { id: 10, name: "Flautas doradas de barbacoa, orden de seis", category: "flautas", description: "Seis flautas doradas rellenas de barbacoa, bañadas en crema, queso y lechuga.", price: 320.00, image: "https://i.ibb.co/PknjzJZ/Photoroom-20260124-142420.jpg", modifiers: { selection: [], extras: [{ id: 108, name: "Extra crema", description: "Crema adicional", price: 5.00 }, { id: 109, name: "Extra queso", description: "Queso rallado adicional", price: 5.00 }] } },
-            { id: 11, name: "Flautas doradas de barbacoa, orden de nueve", category: "flautas", description: "Nueve flautas doradas rellenas de barbacoa, bañadas en crema, queso y lechuga.", price: 480.00, image: "https://i.ibb.co/PknjzJZ/Photoroom-20260124-142420.jpg", modifiers: { selection: [], extras: [{ id: 108, name: "Extra crema", description: "Crema adicional", price: 5.00 }, { id: 109, name: "Extra queso", description: "Queso rallado adicional", price: 5.00 }] } },
-            { id: 12, name: "Flan de cajeta", category: "postres", description: "Tradicional flan casero de cajeta.", price: 40.00, image: "https://i.ibb.co/Kx9J9yQD/IMG-4615.png", modifiers: { selection: [], extras: [] } },
-            { id: 13, name: "Flan de queso", category: "postres", description: "Flan con un toque especial de queso crema.", price: 40.00, image: "https://i.ibb.co/WNvTLTpF/IMG-4617.png", modifiers: { selection: [], extras: [] } },
-            { id: 14, name: "Flan de mazapán", category: "postres", description: "Flan con sabor a mazapán.", price: 40.00, image: "https://i.ibb.co/jPtZQnCr/IMG-4616.png", modifiers: { selection: [], extras: [] } },
-            { id: 15, name: "Agua del día 1 litro", category: "bebidas", description: "Agua fresca del día 1 litro. Elige tu sabor favorito.", price: 90.00, image: "https://i.ibb.co/jPYcqcj3/Photoroom-20260124-141051.jpg", modifiers: { selection: SABORES_AGUA, extras: [] } },
-            { id: 16, name: "Agua del día 1/2 litro", category: "bebidas", description: "Agua fresca del día 1/2 litro. Elige tu sabor favorito.", price: 45.00, image: "https://i.ibb.co/jPYcqcj3/Photoroom-20260124-141051.jpg", modifiers: { selection: SABORES_AGUA, extras: [] } },
-            { id: 17, name: "Café de olla", category: "bebidas", description: "Café tradicional mexicano preparado con canela y piloncillo.", price: 45.00, image: "https://i.ibb.co/Kcm8QRb1/IMG-4614.png", modifiers: { selection: [], extras: [] } },
-            { id: 18, name: "Coca-Cola regular (300 ml)", category: "bebidas", description: "Refresco de cola regular.", price: 45.00, image: "https://i.ibb.co/tpkfLmfw/Photoroom-20260113-234527.jpg", modifiers: { selection: [], extras: [] } }
+        const EXTRA_SIN_GARBANZO = [
+            { id: 107, name: "Sin garbanzo", description: "Preparado sin garbanzo", price: 0.00 }
         ];
+        const EXTRA_FLAUTAS = [
+            { id: 108, name: "Extra crema", description: "Crema adicional", price: 5.00 },
+            { id: 109, name: "Extra queso", description: "Queso rallado adicional", price: 5.00 }
+        ];
+
+        // Asigna los modificadores según la categoría (y nombre para aguas)
+        function getModifiersForProduct(product) {
+            const category = String(product.category || '').toLowerCase();
+            const name = String(product.name || '').toLowerCase();
+            if (category === 'barbacoa') return { selection: CORTES_BARBACOA, extras: EXTRAS_BARBACOA };
+            if (category === 'pancita')  return { selection: [], extras: EXTRAS_BARBACOA };
+            if (category === 'consome')  return { selection: [], extras: EXTRA_SIN_GARBANZO };
+            if (category === 'flautas')  return { selection: [], extras: EXTRA_FLAUTAS };
+            if (category === 'bebidas' && name.includes('agua')) return { selection: SABORES_AGUA, extras: [] };
+            return { selection: [], extras: [] };
+        }
+
+        // ============================================
+        // ESTADO DE PRODUCTOS (se llenan desde Apps Script)
+        // ============================================
+        let products = [];
+        let productsState = 'loading'; // 'loading' | 'loaded' | 'error'
+
+        async function loadProducts() {
+            productsState = 'loading';
+            if (currentScreen === 'home') renderProducts();
+
+            try {
+                const url = MENU_API_URL + (MENU_API_URL.includes('?') ? '&' : '?') + 't=' + Date.now();
+                let response;
+                try {
+                    response = await fetch(url, { cache: 'no-store' });
+                } catch (fetchErr) {
+                    throw new Error('No se pudo conectar con el servidor (Worker caído o sin internet)');
+                }
+                if (!response.ok) throw new Error('HTTP ' + response.status + ' — el servidor respondió con error');
+                const raw = await response.json();
+
+                if (!Array.isArray(raw)) {
+                    if (raw && raw.error) throw new Error(raw.error);
+                    throw new Error('Respuesta inválida del servidor (no es un array)');
+                }
+
+                products = raw
+                    .filter(p => p && p.id !== undefined && p.id !== null && p.id !== '' && p.name) 
+                    .map(p => {
+                        // Maneja available: false, "false", "FALSE", 0, "0" como NO disponible
+                        const availRaw = p.available;
+                        let isAvailable;
+                        if (availRaw === undefined || availRaw === null) {
+                            isAvailable = true; // por defecto disponible
+                        } else if (typeof availRaw === 'boolean') {
+                            isAvailable = availRaw;
+                        } else if (typeof availRaw === 'number') {
+                            isAvailable = availRaw !== 0;
+                        } else {
+                            isAvailable = String(availRaw).toUpperCase() !== 'FALSE' && String(availRaw) !== '0';
+                        }
+                        const base = {
+                            id: Number(p.id),
+                            name: p.name || 'Producto',
+                            category: String(p.category || '').toLowerCase(),
+                            description: p.description || '',
+                            price: Number(p.price) || 0,
+                            image: p.image || 'https://via.placeholder.com/400x300?text=Imagen',
+                            available: isAvailable
+                        };
+                        return { ...base, modifiers: getModifiersForProduct(base) };
+                    })
+                    .sort((a, b) => a.id - b.id);
+
+                productsState = 'loaded';
+                renderProducts();
+                updateCartAvailabilityWarning();
+            } catch (err) {
+                console.error('Error cargando productos:', err);
+                window._lastMenuError = err.message;
+                productsState = 'error';
+                renderProducts();
+            }
+        }
 
         // ============================================
         // ESTADO GLOBAL
         // ============================================
         let cart = [];
         try {
-            cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
             cart = cart.map(item => {
                 if (!item.uniqueId) {
                     const selId = item.selection ? item.selection.id : 'none';
@@ -1299,7 +1580,6 @@
                     btn.setAttribute('title', 'Cambiar a modo oscuro');
                 }
             }
-            // Sincronizar botón del info screen
             const infoIcon = document.getElementById('infoThemeToggleIcon');
             const infoLabel = document.getElementById('infoThemeToggleLabel');
             if (infoIcon && infoLabel) {
@@ -1316,12 +1596,12 @@
         function toggleTheme() {
             const current = document.documentElement.getAttribute('data-theme') || 'light';
             const next = current === 'dark' ? 'light' : 'dark';
-            try { localStorage.setItem('theme', next); } catch(e) {}
+            try { localStorage.setItem(THEME_KEY, next); } catch(e) {}
             applyTheme(next);
         }
 
         // ============================================
-        // GUARDADO SILencioso DE DATOS DEL CLIENTE
+        // GUARDADO SILENCIOSO DE DATOS DEL CLIENTE
         // ============================================
         function saveClientDataSilently() {
             try {
@@ -1368,10 +1648,15 @@
             try {
                 const data = JSON.parse(localStorage.getItem(DELIVERY_DATA_KEY) || '{}');
                 if (!data || !data.address || !data.coords) return false;
-                // No sobrescribir si ya hay una dirección seleccionada
+                // Valida que las coordenadas sean números válidos
+                const lat = parseFloat(data.coords.lat);
+                const lng = parseFloat(data.coords.lng);
+                if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+                    return false;
+                }
                 if (deliveryAddress && deliveryCoords) return false;
                 deliveryAddress = data.address;
-                deliveryCoords = data.coords;
+                deliveryCoords = { lat, lng };
                 if (data.details) {
                     document.getElementById('locationDetails').value = data.details;
                 }
@@ -1395,9 +1680,20 @@
         function getProductTotalQuantity(productId) {
             return cart.filter(item => item.id === productId).reduce((s, i) => s + i.quantity, 0);
         }
-        function saveCart() { localStorage.setItem('cart', JSON.stringify(cart)); }
+        function saveCart() { localStorage.setItem(CART_KEY, JSON.stringify(cart)); }
         function refreshAll() { saveCart(); updateCartDisplay(); renderProducts(); updateCartAvailabilityWarning(); }
         function roundPeso(n) { return Math.round(n); }
+
+        // Escapa HTML para prevenir XSS al insertar datos del usuario en innerHTML
+        function escapeHtml(str) {
+            if (str === undefined || str === null) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
 
         function resetDeliveryLocation() {
             deliveryCoords = null;
@@ -1507,10 +1803,10 @@
 
                 const itemsPreview = (order.items || []).slice(0, 3).map(it => {
                     let mods = '';
-                    if (it.selection) mods += ` · ${it.selection}`;
-                    if (it.extras && it.extras.length) mods += ` · ${it.extras.join(', ')}`;
+                    if (it.selection) mods += ` · ${escapeHtml(it.selection)}`;
+                    if (it.extras && it.extras.length) mods += ` · ${it.extras.map(escapeHtml).join(', ')}`;
                     return `<div class="history-item-line">
-                        <span><span class="qty">${it.quantity}×</span>${it.name}${mods}</span>
+                        <span><span class="qty">${it.quantity}×</span>${escapeHtml(it.name)}${mods}</span>
                         <span>$${(it.price * it.quantity).toFixed(2)}</span>
                     </div>`;
                 }).join('');
@@ -1554,20 +1850,20 @@
 
                     <div class="history-detail-expanded" id="detail-${order.id}">
                         <span class="detail-label"><i class="fas fa-user"></i> Cliente</span>
-                        <div class="detail-row"><span>Nombre</span><strong>${order.customerName || '—'}</strong></div>
-                        <div class="detail-row"><span>Teléfono</span><strong>${order.customerPhone || '—'}</strong></div>
+                        <div class="detail-row"><span>Nombre</span><strong>${escapeHtml(order.customerName) || '—'}</strong></div>
+                        <div class="detail-row"><span>Teléfono</span><strong>${escapeHtml(order.customerPhone) || '—'}</strong></div>
 
                         ${order.deliveryType === 'delivery' ? `
                             <span class="detail-label"><i class="fas fa-map-marker-alt"></i> Entrega</span>
-                            <div class="detail-row"><span>Dirección</span><strong style="text-align:right; max-width: 60%;">${order.address || '—'}</strong></div>
-                            ${order.locationDetails ? `<div class="detail-row"><span>Detalles</span><strong style="text-align:right; max-width: 60%;">${order.locationDetails}</strong></div>` : ''}
-                            ${order.distanceKm ? `<div class="detail-row"><span>Distancia</span><strong>${order.distanceKm} km (${order.zone || ''})</strong></div>` : ''}
+                            <div class="detail-row"><span>Dirección</span><strong style="text-align:right; max-width: 60%;">${escapeHtml(order.address) || '—'}</strong></div>
+                            ${order.locationDetails ? `<div class="detail-row"><span>Detalles</span><strong style="text-align:right; max-width: 60%;">${escapeHtml(order.locationDetails)}</strong></div>` : ''}
+                            ${order.distanceKm ? `<div class="detail-row"><span>Distancia</span><strong>${escapeHtml(order.distanceKm)} km (${escapeHtml(order.zone) || ''})</strong></div>` : ''}
                         ` : ''}
 
                         ${order.isScheduled ? `
                             <span class="detail-label"><i class="fas fa-calendar-check"></i> Programación</span>
-                            <div class="detail-row"><span>Fecha</span><strong>${order.scheduledDate || '—'}</strong></div>
-                            <div class="detail-row"><span>Hora</span><strong>${order.scheduledTime || '—'}</strong></div>
+                            <div class="detail-row"><span>Fecha</span><strong>${escapeHtml(order.scheduledDate) || '—'}</strong></div>
+                            <div class="detail-row"><span>Hora</span><strong>${escapeHtml(order.scheduledTime) || '—'}</strong></div>
                         ` : ''}
 
                         <span class="detail-label"><i class="fas fa-list"></i> Productos</span>
@@ -1576,7 +1872,7 @@
                             if (it.selection) mods.push(it.selection);
                             if (it.extras && it.extras.length) mods = mods.concat(it.extras);
                             return `<div class="detail-row">
-                                <span>${it.quantity}× ${it.name}${mods.length ? ` <em style="color: var(--color-ember-orange); font-style: normal; font-size: 0.6rem;">(${mods.join(', ')})</em>` : ''}</span>
+                                <span>${it.quantity}× ${escapeHtml(it.name)}${mods.length ? ` <em style="color: var(--color-ember-orange); font-style: normal; font-size: 0.6rem;">(${mods.map(escapeHtml).join(', ')})</em>` : ''}</span>
                                 <strong>$${(it.price * it.quantity).toFixed(2)}</strong>
                             </div>`;
                         }).join('')}
@@ -1588,7 +1884,7 @@
 
                         ${order.notes ? `
                             <span class="detail-label"><i class="fas fa-sticky-note"></i> Notas</span>
-                            <div style="color: var(--color-ash); font-style: italic;">${order.notes}</div>
+                            <div style="color: var(--color-ash); font-style: italic;">${escapeHtml(order.notes)}</div>
                         ` : ''}
                     </div>
 
@@ -1642,6 +1938,8 @@
             order.items.forEach(item => {
                 const prod = products.find(p => p.id === item.id);
                 if (!prod) { skippedCount++; return; }
+                // Verifica si el producto está agotado
+                if (!prod.available) { skippedCount++; return; }
 
                 const selection = item.selection ? (prod.modifiers?.selection || []).find(s => s.name === item.selection) || null : null;
                 const extras = [];
@@ -1775,11 +2073,22 @@
             if (currentModalProduct && document.getElementById('productModal').classList.contains('active')) {
                 updateModalAvailabilityWarning();
             }
-            renderProducts();
+            // Solo re-renderiza productos si cambió el estado de disponibilidad
+            // (evita parpadeo cada 30s cuando el usuario está interactuando)
+            if (productsState === 'loaded' && lastScheduleAvailabilityKey !== scheduleAvailabilityKey()) {
+                lastScheduleAvailabilityKey = scheduleAvailabilityKey();
+                renderProducts();
+            }
 
             if (isScheduledOrder && currentScreen === 'checkout') {
                 refreshScheduleSelectorsPreservingSelection();
             }
+        }
+
+        // Clave que resume el estado de disponibilidad (para detectar cambios)
+        let lastScheduleAvailabilityKey = '';
+        function scheduleAvailabilityKey() {
+            return `${scheduleState.isOpen}|${scheduleState.meatLow}|${scheduleState.pancitaLow}`;
         }
 
         function productAvailabilityKind(product) {
@@ -1969,7 +2278,7 @@
         }
 
         // ============================================
-        // MAKE.COM  (la respuesta para copiar se envía aquí, no se muestra al cliente)
+        // MAKE.COM (vía Worker proxy)
         // ============================================
         function sendDataToMake(orderData) {
             if (!MAKE_WEBHOOK_URL || MAKE_WEBHOOK_URL.indexOf('tu_url') !== -1) return;
@@ -2001,15 +2310,21 @@
             params.append('pedido_detalle', orderData.pedido_detalle);
             params.append('pedido_json', JSON.stringify(orderData.cart_raw));
             params.append('aviso_disponibilidad', orderData.aviso_disponibilidad || 'Ninguno');
-            // Texto de respuesta para el cliente (copiar desde Google Sheets)
             params.append('respuesta_cliente', orderData.respuesta_cliente || '');
 
+            // El Worker se encarga del CORS, por eso ya NO usamos 'no-cors'
             fetch(MAKE_WEBHOOK_URL, {
                 method: 'POST',
                 body: params,
                 keepalive: true
             })
-            .then(() => console.log('✅ Pedido enviado a Make.com (con respuesta para Google Sheets)'))
+            .then(response => {
+                if (!response.ok) {
+                    console.warn('⚠️ Make respondió HTTP ' + response.status);
+                } else {
+                    console.log('✅ Pedido enviado a Make.com (vía Worker)');
+                }
+            })
             .catch(err => console.warn('⚠️ No se pudo enviar a Make:', err));
         }
 
@@ -2028,24 +2343,25 @@
 
             scheduleState = getOrderingStatus();
             lastScheduleStateIsOpen = scheduleState.isOpen;
+            lastScheduleAvailabilityKey = scheduleAvailabilityKey();
 
-            // Cargar silenciosamente los datos del cliente
             loadClientDataSilently();
-            
-            // Si la opción por defecto es envío a domicilio, intentar cargar la dirección guardada
+
             if (document.querySelector('input[name="deliveryType"][value="delivery"]').checked) {
                 if (!deliveryAddress && !deliveryCoords) {
                     loadDeliveryDataSilently();
                 }
             }
 
-            renderProducts();
             updateCartDisplay();
             updateHistoryBadge();
             applyScheduleState();
             setInterval(applyScheduleState, 30000);
 
             navigateTo('home');
+
+            // ✅ Cargar productos desde el Worker (que hace proxy a Apps Script)
+            loadProducts();
 
             document.querySelectorAll('.category-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -2074,7 +2390,6 @@
                     document.getElementById('deliveryOption').classList.toggle('selected', dt === 'delivery');
                     if (dt === 'delivery') {
                         document.getElementById('deliveryAddressSection').style.display = 'block';
-                        // Cargar dirección guardada silenciosamente si no hay una seleccionada
                         if (!deliveryAddress && !deliveryCoords) {
                             await loadDeliveryDataSilently();
                         }
@@ -2095,7 +2410,6 @@
                 if (e.key === 'Enter') { e.preventDefault(); searchAddress(); }
             });
 
-            // Guardado silencioso en blur de los campos del cliente
             ['customerName', 'customerPhone', 'customerNotes', 'locationDetails', 'customerDetails'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
@@ -2108,7 +2422,26 @@
 
             document.getElementById('cashMethod').addEventListener('click', () => selectPaymentMethod('cash'));
             document.getElementById('cardMethod').addEventListener('click', () => selectPaymentMethod('card'));
+            // Sincroniza paymentMethod si el usuario cambia el radio directamente
+            document.querySelectorAll('input[name="paymentMethod"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.checked) selectPaymentMethod(this.value);
+                });
+            });
             document.getElementById('cashAmount').addEventListener('input', calculateChange);
+
+            // Listener para el select de tipo de entrega en checkout
+            // (muestra/oculta los campos de dirección dinámicamente cuando no es readonly)
+            document.getElementById('deliveryTypeFinal').addEventListener('change', function() {
+                const isDelivery = this.value === 'delivery';
+                document.getElementById('finalAddressSection').style.display = isDelivery ? 'block' : 'none';
+                document.getElementById('finalDetailsSection').style.display = isDelivery ? 'block' : 'none';
+                if (!isDelivery) {
+                    // Si cambia a pickup, resetea el envío
+                    currentShippingCost = 0;
+                    updateCartDisplay();
+                }
+            });
 
             document.getElementById('checkoutBtn').addEventListener('click', function() { handleCheckout(); });
 
@@ -2140,7 +2473,6 @@
             document.getElementById('scheduleDate').addEventListener('change', function() { populateTimeSlots(); });
             document.getElementById('scheduleTime').addEventListener('change', function() { updateSchedulePreview(); });
 
-            // Estrellas de calificación en Info
             const ratingStars = document.querySelectorAll('#ratingStars i');
             let currentRating = 0;
             ratingStars.forEach(star => {
@@ -2151,7 +2483,7 @@
                 star.addEventListener('click', function() {
                     currentRating = parseInt(this.dataset.val);
                     if (currentRating === 5) {
-                        window.open('https://search.google.com/local/writereview?placeid=ChIJNy4JvZz40YURNjCk-6Ah2zw', '_blank');
+                        window.open('https://search.google.com/local/writereview?placeid=ChIJNy4JvZz40YURNjCk-6Ah2zw', '_blank', 'noopener,noreferrer');
                         showNotification('¡Gracias! Te redirigimos a Google para dejar tu reseña. 🌟', 'success');
                     } else {
                         showNotification(`¡Gracias por calificar con ${currentRating} estrella(s)! 🌟`, 'success');
@@ -2162,10 +2494,35 @@
                 ratingStars.forEach(s => s.classList.toggle('active', parseInt(s.dataset.val) <= currentRating));
             });
 
+            // ===== AVISO DE PRIVACIDAD =====
+            document.querySelectorAll('.privacy-link').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.getElementById('privacyModal').classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                });
+            });
+            document.getElementById('closePrivacyModal').addEventListener('click', function() {
+                document.getElementById('privacyModal').classList.remove('active');
+                document.body.style.overflow = '';
+            });
+            document.getElementById('privacyModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
-                    document.getElementById('productModal').classList.remove('active');
-                    document.body.style.overflow = '';
+                    const modal = document.getElementById('productModal');
+                    if (modal.classList.contains('active')) {
+                        closeProductModal();
+                    }
+                    const privacyModal = document.getElementById('privacyModal');
+                    if (privacyModal && privacyModal.classList.contains('active')) {
+                        privacyModal.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
                 }
             });
         });
@@ -2190,18 +2547,17 @@
 
             if (value === 'other') {
                 otherHint.classList.add('active');
-                useLocationBtn.style.display = 'none'; // Ocultar botón de ubicación
+                useLocationBtn.style.display = 'none';
                 addressLabel.innerHTML = '<i class="fas fa-search" style="color: var(--color-ember-orange);"></i> Dirección de quien recibirá el pedido:';
                 addressInput.placeholder = 'Calle, número, colonia de quien recibe';
                 selectedLabel.textContent = 'Dirección de entrega a la otra persona:';
             } else {
                 otherHint.classList.remove('active');
-                useLocationBtn.style.display = 'flex'; // Mostrar botón de ubicación
+                useLocationBtn.style.display = 'flex';
                 useLocationBtn.innerHTML = '<i class="fas fa-location-arrow"></i> Usar mi ubicación actual';
                 addressLabel.innerHTML = '<i class="fas fa-search" style="color: var(--color-ember-orange);"></i> O ingresa la dirección de entrega:';
                 addressInput.placeholder = 'Calle, número, colonia';
                 selectedLabel.textContent = 'Dirección seleccionada:';
-                // Si vuelve a "Para mí", cargar la dirección guardada
                 if (!deliveryAddress && !deliveryCoords) {
                     loadDeliveryDataSilently();
                 }
@@ -2213,7 +2569,33 @@
         // ============================================
         function renderProducts() {
             const grid = document.getElementById('productsGrid');
+            if (!grid) return;
             grid.innerHTML = '';
+
+            if (productsState === 'loading') {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
+                        <i class="fas fa-sync-alt fa-spin" style="font-size: 2rem; color: var(--color-ember-orange); margin-bottom: 16px; display: block;"></i>
+                        <p style="color: var(--color-ash); font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em;">Cargando menú…</p>
+                    </div>
+                `;
+                return;
+            }
+
+            if (productsState === 'error') {
+                const errMsg = window._lastMenuError || 'Error desconocido';
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px 20px;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: var(--color-ember-orange); margin-bottom: 16px; display: block;"></i>
+                        <p style="color: var(--color-ash); font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">No se pudo cargar el menú</p>
+                        <p style="color: var(--color-soot); font-family: var(--font-mono); font-size: 0.65rem; margin-bottom: 16px; word-break: break-word; max-width: 500px; margin-left: auto; margin-right: auto;">${escapeHtml(errMsg)}</p>
+                        <button type="button" onclick="loadProducts()" class="ghost-btn" style="display: inline-flex; width: auto; padding: 10px 20px; margin-top: 0;">
+                            <i class="fas fa-redo"></i> Reintentar
+                        </button>
+                    </div>
+                `;
+                return;
+            }
 
             const filtered = currentCategory === 'all' ? products : products.filter(p => p.category === currentCategory);
             if (filtered.length === 0) {
@@ -2225,9 +2607,18 @@
                 const totalQty = getProductTotalQuantity(product.id);
                 const hasMods = productHasModifiers(product);
                 const availKind = productAvailabilityKind(product);
+                
+                // Verificamos si está agotado según el estado del producto
+                const isOutOfStock = !product.available;
 
                 let controlsHTML = '';
-                if (hasMods) {
+                if (isOutOfStock) {
+                    controlsHTML = `
+                        <button type="button" class="add-to-cart" disabled style="border-color: var(--color-soot); color: var(--color-ash); cursor: not-allowed;">
+                            <i class="fas fa-ban"></i> Agotado
+                        </button>
+                    `;
+                } else if (hasMods) {
                     controlsHTML = `
                         <button type="button" class="add-to-cart ${totalQty > 0 ? 'in-cart' : ''}" data-action="open-modal">
                             <i class="fas fa-${totalQty > 0 ? 'check' : 'cart-plus'}"></i>
@@ -2250,19 +2641,23 @@
                     }
                 }
 
-                const availBadge = availKind
-                    ? `<div class="availability-badge"><i class="fas fa-exclamation-triangle"></i> ${availKind === 'carne' ? 'Poca carne' : 'Poca pancita'}</div>`
-                    : '';
+                let badgeHTML = '';
+                if (isOutOfStock) {
+                    badgeHTML = `<div class="sold-out-badge"><i class="fas fa-ban"></i> Agotado</div>`;
+                } else if (availKind) {
+                    badgeHTML = `<div class="availability-badge"><i class="fas fa-exclamation-triangle"></i> ${availKind === 'carne' ? 'Poca carne' : 'Poca pancita'}</div>`;
+                }
 
                 const card = document.createElement('div');
-                card.className = 'product-card';
+                card.className = 'product-card' + (isOutOfStock ? ' out-of-stock' : '');
+                
                 card.innerHTML = `
-                    ${availBadge}
-                    ${hasMods ? '<div class="customizable-badge"><i class="fas fa-sliders-h"></i> Opciones</div>' : ''}
-                    <img src="${product.image}" alt="${product.name}" class="product-img" loading="lazy" onerror="this.src='https://via.placeholder.com/400x300?text=Imagen'">
+                    ${badgeHTML}
+                    ${!isOutOfStock && hasMods ? '<div class="customizable-badge"><i class="fas fa-sliders-h"></i> Opciones</div>' : ''}
+                    <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" class="product-img" loading="lazy" onerror="this.src='https://via.placeholder.com/400x300?text=Imagen'">
                     <div class="product-info">
-                        <h3 class="product-title">${product.name}</h3>
-                        <p class="product-desc">${product.description}</p>
+                        <h3 class="product-title">${escapeHtml(product.name)}</h3>
+                        <p class="product-desc">${escapeHtml(product.description)}</p>
                         <div class="product-footer">
                             <div class="product-price">$${product.price.toFixed(2)}</div>
                             <div class="product-quantity-controls">${controlsHTML}</div>
@@ -2271,12 +2666,14 @@
                 `;
 
                 card.addEventListener('click', function(e) {
-                    if (!e.target.closest('button')) openProductModal(product.id);
+                    if (!e.target.closest('button') && !isOutOfStock) openProductModal(product.id);
                 });
 
                 card.querySelectorAll('button[data-action]').forEach(btn => {
                     btn.addEventListener('click', function(e) {
                         e.stopPropagation();
+                        if (isOutOfStock) return;
+
                         const action = this.dataset.action;
                         if (action === 'open-modal') openProductModal(product.id);
                         else if (action === 'inc') {
@@ -2375,7 +2772,7 @@
                 const group = document.createElement('div');
                 let title = 'Selecciona una opción:';
                 if (currentModalProduct.category === 'barbacoa') title = 'Selecciona el corte:';
-                else if (currentModalProduct.id === 15 || currentModalProduct.id === 16) title = 'Selecciona el sabor:';
+                else if (currentModalProduct.category === 'bebidas' && String(currentModalProduct.name || '').toLowerCase().includes('agua')) title = 'Selecciona el sabor:';
                 group.innerHTML = `<div class="modifiers-title">${title}</div>`;
 
                 modifiers.selection.forEach(mod => {
@@ -2385,8 +2782,8 @@
                         <div class="radio-indicator"></div>
                         <label>
                             <div class="modifier-option-text">
-                                <div class="modifier-name">${mod.name}</div>
-                                ${mod.description ? `<div class="modifier-desc">${mod.description}</div>` : ''}
+                                <div class="modifier-name">${escapeHtml(mod.name)}</div>
+                                ${mod.description ? `<div class="modifier-desc">${escapeHtml(mod.description)}</div>` : ''}
                             </div>
                             <div class="option-price">${mod.price > 0 ? `+$${mod.price.toFixed(2)}` : 'Gratis'}</div>
                         </label>
@@ -2410,8 +2807,8 @@
                     item.className = 'modifier-item';
                     item.innerHTML = `
                         <div class="modifier-info">
-                            <div class="modifier-name">${mod.name}</div>
-                            ${mod.description ? `<div class="modifier-desc">${mod.description}</div>` : ''}
+                            <div class="modifier-name">${escapeHtml(mod.name)}</div>
+                            ${mod.description ? `<div class="modifier-desc">${escapeHtml(mod.description)}</div>` : ''}
                         </div>
                         <div style="display: flex; align-items: center; gap: 15px;">
                             <div class="modifier-price">${mod.price > 0 ? `+$${mod.price.toFixed(2)}` : 'Gratis'}</div>
@@ -2522,18 +2919,18 @@
                     const el = document.createElement('div');
                     el.className = 'cart-item';
                     let modsText = '';
-                    if (item.selection) modsText += `<small style="color: var(--color-ember-orange); font-size: 0.6rem; display:block; letter-spacing:0.02em;">Corte: ${item.selection.name}</small>`;
-                    if (item.extras?.length) modsText += `<small style="color: var(--color-ember-orange); font-size: 0.6rem; display:block; letter-spacing:0.02em;">Extras: ${item.extras.map(m => m.name).join(', ')}</small>`;
+                    if (item.selection) modsText += `<small style="color: var(--color-ember-orange); font-size: 0.6rem; display:block; letter-spacing:0.02em;">Corte: ${escapeHtml(item.selection.name)}</small>`;
+                    if (item.extras?.length) modsText += `<small style="color: var(--color-ember-orange); font-size: 0.6rem; display:block; letter-spacing:0.02em;">Extras: ${item.extras.map(m => escapeHtml(m.name)).join(', ')}</small>`;
 
                     el.innerHTML = `
                         <div style="flex:1; min-width:0;">
-                            <h4 style="overflow:hidden; text-overflow:ellipsis;">${item.name}</h4>
+                            <h4 style="overflow:hidden; text-overflow:ellipsis;">${escapeHtml(item.name)}</h4>
                             ${modsText}
                             <small style="color: var(--color-ash); font-size: 0.62rem;">$${item.price.toFixed(2)} c/u</small>
                         </div>
                         <div class="cart-item-controls">
-                            <input type="number" min="1" value="${item.quantity}" class="cart-item-qty" data-uid="${item.uniqueId}" inputmode="numeric">
-                            <button type="button" class="remove-item" data-uid="${item.uniqueId}" title="Eliminar">
+                            <input type="number" min="1" value="${item.quantity}" class="cart-item-qty" data-uid="${item.uniqueId}" inputmode="numeric" aria-label="Cantidad de ${item.name}">
+                            <button type="button" class="remove-item" data-uid="${item.uniqueId}" title="Eliminar" aria-label="Eliminar ${item.name} del carrito">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -2642,7 +3039,9 @@
                         const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=18&addressdetails=1&accept-language=es`;
                         const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
                         const data = await res.json();
-                        deliveryAddress = data.display_name || `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
+                        // Construye una dirección legible desde los componentes
+                        const built = buildDisplayAddress(data, '');
+                        deliveryAddress = built || `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
                     } catch (err) {
                         deliveryAddress = `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
                     }
@@ -2666,10 +3065,68 @@
             );
         }
 
+        // ============================================
+        // GEOCODIFICACIÓN MEJORADA (Nominatim)
+        // ============================================
+
+        // Tipos de resultado de Nominatim que indican una resolución
+        // solo a nivel colonia/ciudad (NO a nivel calle+número).
+        const COARSE_PLACE_TYPES = [
+            'suburb', 'neighbourhood', 'neighbourhood_around', 'city',
+            'town', 'village', 'hamlet', 'administrative', 'locality',
+            'quarter', 'borough', 'postcode', 'municipality', 'state'
+        ];
+
+        // De una lista de resultados de Nominatim, elige el más específico.
+        // Prioridad: calle+número > solo calle > primero disponible.
+        function pickBestNominatimResult(results) {
+            if (!Array.isArray(results) || results.length === 0) return null;
+            const withHouseAndRoad = results.find(r => r.address && r.address.road && r.address.house_number);
+            if (withHouseAndRoad) return withHouseAndRoad;
+            const withRoad = results.find(r => r.address && r.address.road);
+            if (withRoad) return withRoad;
+            return results[0];
+        }
+
+        // Construye una dirección legible combinando los componentes de Nominatim.
+        // Si el resultado NO tiene calle+número, mezcla la query original del
+        // usuario (que sí contiene la calle/número que él escribió) con el
+        // contexto resuelto (colonia, ciudad, estado).
+        function buildDisplayAddress(place, originalQuery) {
+            if (!place) return originalQuery || '';
+            const a = place.address || {};
+            const hasSpecific = !!(a.road && a.house_number);
+
+            if (hasSpecific) {
+                const parts = [];
+                parts.push(a.road + ' ' + a.house_number);
+                if (a.neighbourhood) parts.push(a.neighbourhood);
+                else if (a.suburb) parts.push(a.suburb);
+                else if (a.quarter) parts.push(a.quarter);
+                if (a.postcode) parts.push('CP ' + a.postcode);
+                if (a.city || a.town || a.village) parts.push(a.city || a.town || a.village);
+                if (a.state) parts.push(a.state);
+                return parts.join(', ');
+            }
+
+            // Sin calle+número: combina query original con el contexto resuelto
+            const contextual = [];
+            if (a.neighbourhood) contextual.push(a.neighbourhood);
+            else if (a.suburb) contextual.push(a.suburb);
+            else if (a.quarter) contextual.push(a.quarter);
+            if (a.city || a.town || a.village) contextual.push(a.city || a.town || a.village);
+            if (a.state) contextual.push(a.state);
+
+            if (originalQuery && contextual.length > 0) {
+                return originalQuery + ', ' + contextual.join(', ');
+            }
+            return originalQuery || place.display_name || '';
+        }
+
         async function searchAddress() {
             const input = document.getElementById('addressInput');
-            const address = input.value.trim();
-            if (!address) { showNotification('Ingresa una dirección', 'error'); return; }
+            const rawAddress = input.value.trim();
+            if (!rawAddress) { showNotification('Ingresa una dirección', 'error'); return; }
 
             const btn = document.getElementById('searchAddressBtn');
             btn.disabled = true;
@@ -2677,23 +3134,72 @@
             document.getElementById('autoCalculatingStatus').classList.add('active');
 
             try {
-                const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1&countrycodes=mx&addressdetails=1&accept-language=es`;
-                const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
-                const data = await res.json();
+                // 1) Construye la query con contexto geográfico si el usuario no lo incluyó
+                const lower = rawAddress.toLowerCase();
+                const hasContext = /(mexico|méxico|cdmx|ciudad de m|azcapotzalco|distrito federal|\bdf\b)/.test(lower);
+                const contextualQuery = hasContext
+                    ? rawAddress
+                    : rawAddress + ', Azcapotzalco, Ciudad de México, México';
 
-                if (!data || data.length === 0) {
-                    showNotification('Dirección no encontrada. Intenta con más detalles.', 'error');
+                // 2) viewbox alrededor del restaurante (~15 km) para sesgar resultados
+                const d = 0.15;
+                const viewbox = `${restaurantCoords.lng - d},${restaurantCoords.lat - d},${restaurantCoords.lng + d},${restaurantCoords.lat + d}`;
+
+                const params = new URLSearchParams({
+                    q: contextualQuery,
+                    format: 'json',
+                    limit: '5',
+                    countrycodes: 'mx',
+                    addressdetails: '1',
+                    'accept-language': 'es',
+                    viewbox: viewbox,
+                    bounded: '0'
+                });
+
+                let url = `https://nominatim.openstreetmap.org/search?${params.toString()}`;
+                let res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+                let data = await res.json();
+
+                // 3) Si con contexto no hubo resultados, reintenta con la query original
+                if (!Array.isArray(data) || data.length === 0) {
+                    const fallbackUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(rawAddress)}&format=json&limit=5&countrycodes=mx&addressdetails=1&accept-language=es`;
+                    res = await fetch(fallbackUrl, { headers: { 'Accept': 'application/json' } });
+                    data = await res.json();
+                }
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    showNotification('Dirección no encontrada. Intenta con más detalles (calle, número, colonia).', 'error');
                     document.getElementById('autoCalculatingStatus').classList.remove('active');
                     return;
                 }
-                const place = data[0];
-                deliveryCoords = { lat: parseFloat(place.lat), lng: parseFloat(place.lon) };
-                deliveryAddress = place.display_name;
+
+                // 4) Elige el mejor resultado y aplica
+                const best = pickBestNominatimResult(data);
+                const lat = parseFloat(best.lat);
+                const lon = parseFloat(best.lon);
+                if (isNaN(lat) || isNaN(lon)) {
+                    showNotification('No se pudieron obtener coordenadas válidas. Intenta con otra dirección.', 'error');
+                    document.getElementById('autoCalculatingStatus').classList.remove('active');
+                    return;
+                }
+
+                deliveryCoords = { lat, lng: lon };
+                const displayAddr = buildDisplayAddress(best, rawAddress);
+                deliveryAddress = displayAddr;
                 showSelectedAddress(deliveryAddress);
+
+                // 5) Si el resultado es impreciso, avisa al usuario
+                const placeType = (best.type || '').toLowerCase();
+                const isCoarse = COARSE_PLACE_TYPES.includes(placeType) || !best.address || !best.address.road;
+                if (isCoarse) {
+                    showNotification('Ubicación aproximada. Verifica el mapa y agrega los detalles de la ubicación (número, color de fachada, referencias).', 'warning');
+                }
+
                 await calculateDistanceAndCost();
                 saveDeliveryDataSilently();
             } catch (err) {
-                showNotification('Error al buscar la dirección. Intenta de nuevo.', 'error');
+                console.warn('Error en búsqueda de dirección:', err);
+                showNotification('Error al buscar la dirección. Revisa tu conexión e intenta de nuevo.', 'error');
                 document.getElementById('autoCalculatingStatus').classList.remove('active');
             } finally {
                 btn.disabled = false;
@@ -2790,7 +3296,9 @@
         function calculateChange() {
             const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
             const total = subtotal + currentShippingCost;
-            const cash = parseFloat(document.getElementById('cashAmount').value) || 0;
+            // Sanitiza el monto: si es negativo o NaN, lo trata como 0
+            let cash = parseFloat(document.getElementById('cashAmount').value);
+            if (isNaN(cash) || cash < 0) cash = 0;
             const changeInfo = document.getElementById('changeInfo');
             if (cash > 0 && cash >= total) {
                 document.getElementById('changeAmount').textContent = `$${(cash - total).toFixed(2)}`;
@@ -2802,7 +3310,11 @@
             const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
             const total = subtotal + currentShippingCost;
             if (paymentMethod === 'cash') {
-                const cash = parseFloat(document.getElementById('cashAmount').value) || 0;
+                let cash = parseFloat(document.getElementById('cashAmount').value);
+                if (isNaN(cash) || cash < 0) {
+                    showNotification('Ingresa un monto válido', 'error');
+                    return false;
+                }
                 if (cash === 0) { showNotification('Ingresa el monto con el que pagarás', 'error'); return false; }
                 if (cash < total) { showNotification(`El monto debe ser ≥ $${total.toFixed(2)}`, 'error'); return false; }
             }
@@ -2975,7 +3487,7 @@
                 if (item.selection) mods.push(item.selection.name);
                 if (item.extras?.length) mods = mods.concat(item.extras.map(m => m.name));
                 html += `<div style="display:flex; justify-content:space-between; margin-bottom:6px; gap:10px;">
-                    <span>${item.quantity}x ${item.name}${mods.length ? ` <small style="color:var(--color-ember-orange);">(${mods.join(', ')})</small>` : ''}</span>
+                    <span>${item.quantity}x ${escapeHtml(item.name)}${mods.length ? ` <small style="color:var(--color-ember-orange);">(${mods.map(escapeHtml).join(', ')})</small>` : ''}</span>
                     <span>$${(item.price * item.quantity).toFixed(2)}</span>
                 </div>`;
             });
@@ -2986,7 +3498,7 @@
         }
 
         // ============================================
-        // ENVÍO DE PEDIDO (WhatsApp nativo + Make + Historial)
+        // ENVÍO DE PEDIDO (WhatsApp nativo + Worker → Make + Historial)
         // ============================================
         function sendOrderToWhatsApp() {
             let scheduledDateLabel = '';
@@ -3038,7 +3550,6 @@
                 paymentDetails = `*Paga con:* $${cashAmountVal.toFixed(2)}%0A*Cambio:* $${cambioVal.toFixed(2)}%0A`;
             }
 
-            // ============ GUARDAR DATOS DEL CLIENTE (silencioso) ============
             try {
                 localStorage.setItem(CLIENT_DATA_KEY, JSON.stringify({
                     name: customerName,
@@ -3048,7 +3559,6 @@
             } catch(e) {}
             if (deliveryType === 'delivery') saveDeliveryDataSilently();
 
-            // ============ TEXTO DE RESPUESTA (se envía a Make/Google Sheets, no se muestra al cliente) ============
             let respuestaCliente = '';
             if (isScheduledOrder) {
                 respuestaCliente =
@@ -3064,7 +3574,6 @@
                     `¡Gracias por tu pedido! 🙌`;
             }
 
-            // ============ MENSAJE WHATSAPP ============
             let msg = '';
             msg += `🍖 *Barbacoa de la Casa Vieja*%0A`;
             msg += `━━━━━━━━━━━━━━━━━━━━%0A%0A`;
@@ -3125,7 +3634,6 @@
             if (deliveryType === 'delivery') msg += `*ENVÍO:* $${currentShippingCost.toFixed(2)}%0A`;
             msg += `*TOTAL:* $${total.toFixed(2)}%0A`;
 
-            // ============ GUARDAR EN HISTORIAL ============
             const pedidoId = 'PED-' + Date.now().toString().slice(-8);
             const historyOrder = {
                 id: pedidoId,
@@ -3160,7 +3668,6 @@
             };
             saveOrderToHistory(historyOrder);
 
-            // ============ MAKE.COM (Enviar ANTES de abrir WhatsApp para evitar que el navegador cancele la petición) ============
             try {
                 const pedidoDetalle = cart.map(item => {
                     let mods = [];
@@ -3202,11 +3709,16 @@
                 console.warn('Error preparando datos para Make:', err);
             }
 
-            // ============ ABRIR WHATSAPP ============
-            const waLink = `https://wa.me/${whatsappNumber.replace(/\D/g, '')}?text=${msg}`;
-            window.open(waLink, '_blank');
+            // Abrimos WhatsApp INMEDIATAMENTE (sin setTimeout) para evitar bloqueos
+            // de popup en móviles (iOS Safari bloquea window.open asíncrono).
+            // Make.com recibe los datos en paralelo vía fetch keepalive.
+            // El msg contiene %0A pre-codificados; los convertimos a \n reales y
+            // luego codificamos todo con encodeURIComponent para que caracteres
+            // especiales (&, =, #, espacios, acentos) no rompan la URL.
+            const msgForUrl = msg.replace(/%0A/g, '\n');
+            const waLink = `https://wa.me/${whatsappNumber.replace(/\D/g, '')}?text=${encodeURIComponent(msgForUrl)}`;
+            window.open(waLink, '_blank', 'noopener,noreferrer');
 
-            // ============ PANTALLA DE CONFIRMACIÓN ============
             const confirmTitle = document.getElementById('confirmationTitle');
             const confirmScheduleInfo = document.getElementById('confirmationScheduleInfo');
 
@@ -3219,14 +3731,11 @@
                 confirmScheduleInfo.classList.remove('active');
             }
 
-            // ============ RESET ============
             cart = [];
             isScheduledOrder = false;
             saveCart();
             document.getElementById('orderForm').reset();
-            // Desbloquear campos para la próxima vez
             setDeliveryFieldsReadOnly(false);
-            // Re-cargar los datos del cliente después del reset del formulario
             loadClientDataSilently();
             document.getElementById('addressInput').value = '';
             document.getElementById('locationDetails').value = '';
